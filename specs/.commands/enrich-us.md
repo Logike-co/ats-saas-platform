@@ -1,34 +1,39 @@
-# Enrich User Story
+# Enrich user story
 
-Please analyze and fix the Jira ticket: $ARGUMENTS.
+Improve a user story or ticket so it is **ready for planning and implementation** on **LTI ATS**.
 
-Follow these steps:
+# Input
 
-1. Use Jira MCP to get the ticket details, whether it is the ticket id/number, keywords referring to the ticket or indicating status, like "the one in progress"
+`$ARGUMENTS` — ticket id, link, **path to a markdown file** in the repo, or pasted story text.
 
-2. You will act as a product expert with technical knowledge
+# Steps
 
-3. Understand the problem described in the ticket
+1. **Load context**
+   - If Jira (or similar) MCP is available and the user gave an id, fetch the ticket.
+   - If the user gave a **local path** (e.g. `docs/...`, `specs/...`), read that file and **do not** require MCP.
+   - Use `docs/01.context.md`, `docs/02.functional_summary.md`, and `workflows/development_workflow.md` as product references.
 
-4. Decide whether or not the User Story is completely detailed according to product's best practices:
-   - **Mandatory Specification:** Debe incluir una descripción completa de la funcionalidad y, para entidades principales, el desglose de casos de uso estándar: `Create`, `Update`, `Delete`, `Search` (listado/filtros) y **`FindById`** (detalle).
-   - **Technical Details:** Lista completa de campos a actualizar, estructura y URLs de endpoints necesarios, archivos a modificar según arquitectura hexagonal y mejores prácticas, pasos para considerar la tarea completa, actualización de documentación, creación de pruebas unitarias y requisitos no funcionales (seguridad, rendimiento, etc.).
+2. **Product + technical clarity**
+   - Ensure **actors** (recruiter, hiring manager, admin, candidate) and **goal** are explicit.
+   - Add **acceptance criteria** (Given / When / Then) where useful.
+   - For data-heavy stories, reference or list **fields**, **states**, and **tenant** expectations (see `docs/08.data.md`).
+   - For UI stories, describe **screens**, empty/loading/error states, and **Spanish** copy expectations (no Vaadin — stack is **Next.js**).
+   - For API-dependent stories, list **endpoints** or contract expectations under `/api/v1` (coordinate with backend).
 
-5. If the user story lacks the technical and specific detail necessary to allow the developer to be fully autonomous when completing it, provide an improved story that is clearer, more specific, and more concise in line with product best practices described in step 4. Use the technical context you will find in
-@documentation. Return it in markdown format.
+3. **Autonomy**
+   - The enriched story must be enough for `plan-backend-ticket` / `plan-frontend-ticket` without guesswork.
 
-6. **Actualización en Jira:** Agrega el nuevo contenido (especificación técnica completa) directamente en la descripción del ticket **después del contenido original**.
-   - Utiliza un separador claro como `---` o `***`.
-   - REGLA CRÍTICA: Utiliza **ÚNICAMENTE formato Markdown estándar** (`#`, `##`, `*`, `-`, `**`, `>`).
-   - **PROHIBIDO** el uso de etiquetas de estilo de Jira como `{panel}`, `h1.`, `h2.`, `*negrita*` (usar `**negrita**`), o cualquier macro de Confluence/Jira.
-   - Asegúrate de que el detalle sea puramente Markdown para garantizar consistencia.
+4. **Output**
+   - Return the **improved story in Markdown** (clear headings, lists).
+   - If the user asked to **persist** the result, write to a file under `specs/changes/` or append to the ticket description in the tracking tool **using standard Markdown only** (no Jira wiki macros if the tool breaks formatting).
 
-7. **Generar Mockup de UI:**
-   - Utiliza la herramienta `generate_image` para crear un mockup profesional de alta fidelidad.
-   - Sigue el tema "Vaadin Lumo Dark" y los estándares del proyecto (`vaadin-admin-screens.mdc`).
-   - REGLA CRÍTICA: En la columna de acciones de la grilla, SOLO muestra iconos (lápiz, papelera), SIN etiquetas de texto como "Editar" o "Eliminar".
-   - Adjunta el mockup generado al ticket de Jira usando `jira_upload_attachment`.
+5. **Optional mockup**
+   - Only if the user explicitly wants a visual: generate or attach a simple mockup; **do not** assume Vaadin theming — use neutral / product-appropriate UI. Skip if no image tooling is available.
 
-8. **Referencias:** Menciona el nombre del archivo del mockup adjunto dentro de la descripción técnica.
+6. **Workflow**
+   - If your tracker has columns, move the item according to team rules (e.g. from “To refine” to “Ready for planning”) when that was requested.
 
-9. If the ticket status was "To refine", move the task to the "Pending refinement validation" column.
+# Notes
+
+- **Multi-tenant** and **audit** requirements should be called out when the story touches candidate data or status changes.
+- Coupled backend+frontend work should be **flagged** so planning uses **one branch / one PR** (see `workflows/development_workflow.md`).

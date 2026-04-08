@@ -1,125 +1,72 @@
 ---
-description: "Arquitectura y estándares del monolito modular (Hexagonal + DDD) para FMS SaaS"
-globs: "{src/main/java,src/test/java}/**/*.java"
+description: "Arquitectura y estándares del monorepo LTI ATS (NestJS backend modular, REST, multi-tenant)"
+globs: "ATS/apps/backend/**/*.ts,ATS/packages/shared/**/*.ts"
 alwaysApply: false
 ---
 
-# FMS SaaS · Reglas de arquitectura (Monolito Modular)
+# LTI ATS · Reglas de arquitectura (backend)
 
-## Estructura de carpetas (shape esperado por módulo)
+Contexto del producto: **Applicant Tracking System** SaaS multi-tenant para PYMEs. Código aplicación en `ATS/` (monorepo `pnpm`).
 
-- Cada bounded context debe mantener el mismo “shape”:
+## Ubicación y forma del backend
 
-```text
-src/main/java/co/logike/fms/<module>/
-├── application/
-│   ├── ports/
-│   │   ├── in/                 # UseCases (interfaces)
-│   │   └── out/                # Ports (interfaces)
-│   └── service/                # Implementaciones de UseCase / orquestación
-├── domain/
-│   └── model/                  # Dominio puro (sin deps externas)
-└── infrastructure/
-    └── adapters/
-        ├── in/
-        │   ├── web/            # REST/HTTP (si aplica)
-        │   └── ui/             # Vaadin SSR
-        └── out/
-            └── persistence/    # JPA/SQL, mappers, repositorios
-```
+- Backend: **`ATS/apps/backend`** (NestJS, TypeScript).
+- Contratos compartidos / tipos: **`ATS/packages/shared`** cuando aplique.
+- API REST versionada: prefijo **`/api/v1`**.
+- Documentación de arquitectura del producto: raíz del repo **`docs/`**, **`guides/`**, flujo **`workflows/development_workflow.md`**.
 
-- Las piezas “cross-cutting” van en `co/logike/fms/common/**` (no duplicarlas en cada módulo).
+## Monolito modular (por feature)
 
-## Monolito modular (Package-by-Feature / Bounded Contexts)
+- Organizar por **módulos de dominio** (ej. `jobs`, `applications`, `tenancy`, `notifications`), no por capa técnica plana.
+- Dentro de un módulo NestJS típico: `*.module.ts`, `*.controller.ts`, servicios de aplicación, DTOs, y acceso a datos (repositorios / Prisma cuando exista).
+- **Prohibido** acoplar módulos mediante imports circulares o acceso a persistencia de otro módulo sin contrato explícito.
+- **Multi-tenant:** toda lectura/escritura de datos de negocio debe filtrarse por **`tenant_id`** (ver `docs/08.data.md`).
 
-- Cada módulo (bounded context) vive en su paquete (`company`, `fleet`, `personnel`, `accounting`, etc.).
-- **Prohibido** acceder directo a lógica profunda o persistencia de otro módulo.
-- La comunicación entre módulos debe ocurrir **solo** por interfaces públicas (puertos/casos de uso), y los límites se
-  deben poder reforzar con **ArchUnit**.
+## Dependencias (hacia adentro)
 
-## Hexagonal / Clean Architecture (dependencias hacia adentro)
+- **Controllers**: validación de entrada (DTO + `class-validator`), orquestación mínima, llamada a servicios.
+- **Servicios / casos de uso**: reglas y orquestación; sin detalles de HTTP.
+- **Dominio**: entidades y reglas críticas preferiblemente testeables sin Nest ni DB.
+- **Infraestructura**: Prisma/DB, clientes HTTP, colas (BullMQ), fuera del núcleo de reglas cuando sea posible.
 
-- **`domain`**: lógica pura, sin dependencias externas.
-- **`application`**: orquesta casos de uso; define puertos `ports.in` y `ports.out`.
-- **`infrastructure`**: detalles técnicos (web/ui, persistencia, integraciones).
-- UI / controllers **no** hablan con repositorios JPA ni entidades JPA: dependen de **puertos de entrada**.
+## Convenciones de naming
 
-## Convenciones de nombres (estrictas)
+- Código en **inglés** (identificadores, archivos, símbolos).
+- DTOs con sufijo claro (`CreateJobDto`, `JobResponseDto`).
+- Servicios con responsabilidad única; evitar `UtilService` genéricos.
 
-- **Inbound ports**: sufijo `UseCase` (ej. `CreateCompanyUseCase`)
-  - **Obligatorios para entidades**: `Create`, `Update`, `Delete`, `Search`, `FindById`.
-    - `execute(...)` para comandos (mutación)
-    - `query(...)` para consultas (solo lectura)
-- **Outbound ports**: sufijo `Port` y ser específicos por ISP (ej. `FindCompanyByIdPort`)
-    - `execute(...)` escritura, `query(...)` lectura
-- **Application services**: sufijo `Service` (orquestan; la lógica pesada vive en dominio)
-- **Adapters**: sufijo `Adapter` (ej. `CompanyRepositoryJpaAdapter`)
+## Errores y API
 
-## Principios de diseño (como reglas de implementación)
+- Respuestas de error coherentes: código de negocio, mensaje controlado, **`traceId`** cuando exista correlación (ver `docs/07.code_and_technical_design.md`).
+- **Fail-fast** en validación de entrada; no filtrar datos sensibles en mensajes al cliente.
+- Códigos HTTP semánticos (4xx validación/autorización, 5xx solo fallos inesperados).
 
-- Preferir soluciones simples y operables por equipo pequeño (**KISS**, **YAGNI**).
-- Evitar duplicación (**DRY**) y mantener responsabilidades únicas (**SOLID**).
-- La lógica de negocio “pesada” debe vivir en **`domain`** (entidades/VO), no en controllers ni en infraestructura.
+## Seguridad
 
-## Excepciones y errores HTTP
+- Autenticación/autorización vía **Keycloak (OIDC)**; el backend valida JWT (issuer, audience, exp).
+- No loguear secretos ni tokens completos.
+- MFA obligatorio para administradores (requisito de producto; ver `docs/`).
 
-- Usar excepciones **Runtime** (no verificadas).
-- **No leakage**: nunca propagar excepciones técnicas crudas (p.ej. `SQLException`) hacia arriba; envolver en
-  excepciones semánticas.
-- Transformar errores HTTP solo en el `GlobalExceptionHandler`, usando **RFC 7807 (ProblemDetail)**.
+## TDD y pruebas
 
-## Null-safety
+- **TDD obligatorio** para lógica nueva (proyecto); prioridad en reglas de negocio y casos de uso.
+- Objetivo: **~90% cobertura en lógica crítica** (según `docs/03.quality_attributes.md`).
+- Backend: **Jest**; ejecutar desde `ATS/` con `pnpm --filter @lti-ats/backend test` (o equivalente del workspace).
+- Tests de integración con DB cuando el comportamiento dependa de SQL/constraints (estrategia a definir con Prisma/Testcontainers según evolución del repo).
 
-- Anotar con **JSpecify** `@NonNull` / `@Nullable`.
-- “Double Defense”: en servicios validar nulos con `Objects.requireNonNull(...)` para fallar rápido.
-- En tests, para pasar nulos intencionales a firmas `@NonNull`, usar `NullSafetyTestUtils.nullOf(Class<T>)`.
+## Herramientas
 
-## TDD (estricto por capas)
+- Build / run: **`pnpm`** workspaces desde `ATS/`.
+- Lint: ESLint en backend; no desactivar reglas salvo justificación en PR.
 
-- **Estricto (test-first)** en:
-    - `domain`: invariantes, reglas, Value Objects, validaciones
-    - `application`: casos de uso/orquestación (mocks/dobles para `ports.out`)
-- **Pragmático** en:
-    - UI Vaadin (`infrastructure/adapters/in/ui`): mantenerla delgada; la lógica se cubre en `domain`/`application`
-    - persistencia/integraciones: preferir tests unitarios, y usar **Testcontainers** cuando el comportamiento depende
-      de DB/mapeos/constraints
-- Ciclo base: **Red → Green → Refactor**.
-- Pirámide de pruebas:
-    - **Unitarias**: rápidas, determinísticas, sin I/O (preferidas).
-    - **Integración**: mínimas pero representativas en caminos críticos.
-- Evitar tests frágiles:
-    - sin `sleep`
-    - sin depender de orden de ejecución
-    - asserts pequeños y con intención clara
+## Git y entrega
 
-## Testing (2 suites, por intención)
+- **Trunk-based**: ramas `feature/*` desde **`main`**; PR a **`main`** (ver `workflows/development_workflow.md` y `specs/.commands/commit.md`).
+- Features **acoplados** backend+frontend: **un solo PR** con alcance unificado cuando proceda.
 
-- **Suite rápida (default)**:
-    - Debe pasar sin Docker.
-    - Ejecuta con `mvn test`.
-    - Enfocada en `domain` y `application` (TDD estricto por capas).
-- **Suite de integración (PostgreSQL real)**:
-  - Ejecuta con `mvn verify -Pit` (activa Failsafe + `vaadin.skip=true`).
-  - Solo entonces corren los tests `*IT.java`; sin `-Pit` no dependes de Docker.
-    - Usa Testcontainers para validar persistencia/constraints/queries/mapeos críticos.
+## Anti-patrones
 
-## Stack / defaults del proyecto (útil para decisiones)
-
-- Backend/UI en un solo despliegue JVM (**Spring Boot + Vaadin SSR**).
-- Persistencia relacional (**PostgreSQL**) vía adaptadores de infraestructura.
-- IAM externalizado (**Keycloak OIDC/OAuth2**).
-- Build: **Maven**. Mapeo: **MapStruct**. Documentación API (si se toca REST): **OpenAPI**.
-
-## Flujo de control estándar (no saltarse capas)
-
-- Web/UI adapter recibe input → valida/mappea → invoca **Inbound Port (UseCase)**.
-- Application Service orquesta → carga/persiste vía **Outbound Ports**.
-- Dominio ejecuta reglas → infraestructura materializa detalles (JPA/SQL, integraciones).
-- Respuesta vuelve por el adapter (mapa a DTO/VM). No mezclar DTOs web con dominio.
-
-## Calidad y contribución
-
-- Mantener el proyecto simple: DRY, KISS, YAGNI (evitar sobreingeniería).
-- Antes de push: `mvn test`. Objetivo de cobertura: **> 90%** (JUnit5/Mockito/JaCoCo) y reglas de arquitectura con *
-  *ArchUnit**.
-- Integración a main solo por PR con revisión. Commits con **Conventional Commits** (`feat:`, `fix:`, `chore:`, etc.).
+- Lógica de negocio pesada en controllers.
+- Consultas sin `tenant_id` en entidades multi-tenant.
+- Microservicios o colas complejas sin necesidad documentada (ADR).
+- Dependencias nuevas sin justificar en el PR.

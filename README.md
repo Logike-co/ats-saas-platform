@@ -10,9 +10,11 @@ Este proyecto incluye **documentación de arquitectura** (guía Simon Brown), el
 
 | Ruta | Descripción |
 | :--- | :--- |
-| [`docs/`](docs/) | Arquitectura y contexto del producto (13 temas + guía y plantilla). |
+| [`docs/`](docs/) | Arquitectura y contexto del producto (13 temas Simon Brown). |
+| [`guides/`](guides/) | Guía Simon Brown y plantilla reutilizable de documentación. |
+| [`workflows/`](workflows/) | Flujo de desarrollo (trunk-based, PR, roles, comandos). |
 | [`ATS/`](ATS/) | Monorepo aplicación: frontend (Next.js), backend (NestJS), paquete compartido, Docker y CI. |
-| [`specs/`](specs/) | Especificaciones y agentes de apoyo al desarrollo. |
+| [`specs/`](specs/) | Agentes (`.agents/`), reglas (`.agents/rules/`), comandos (`.commands/`), planes generados (`changes/`). |
 
 Índice principal de arquitectura: [`docs/00.index.md`](docs/00.index.md).
 
@@ -93,7 +95,8 @@ Fase inicial: **esqueleto ejecutable** (frontend + backend + infra Docker) listo
 
 ## Contribución
 
-- Flujo de ramas y calidad: [`docs/12.development_and_contribution.md`](docs/12.development_and_contribution.md).
+- Flujo end-to-end (trunk-based, PR único por feature acoplado, CI): [`workflows/development_workflow.md`](workflows/development_workflow.md).
+- Ramas, DoD y CI: [`docs/12.development_and_contribution.md`](docs/12.development_and_contribution.md).
 - No subir secretos: usar `.env` local (ver [`.gitignore`](.gitignore)).
 
 ---

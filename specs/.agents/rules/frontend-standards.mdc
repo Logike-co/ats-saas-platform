@@ -1,0 +1,18 @@
+---
+description: "Estándares de frontend Next.js (App Router) para LTI ATS"
+globs: "ATS/apps/frontend/**/*.tsx,ATS/apps/frontend/**/*.ts"
+alwaysApply: false
+---
+
+# LTI ATS · Reglas de frontend
+
+- Ubicación: **`ATS/apps/frontend`** (Next.js 14+, React 18, TypeScript **strict**).
+- Consumo de API: REST en **`/api/v1`** (variable `NEXT_PUBLIC_API_URL`); preferir Server Components + `fetch` donde encaje; Client Components cuando haya estado o eventos.
+- **Idioma de UI**: español para textos visibles al usuario; código e identificadores en inglés.
+- Accesibilidad: HTML semántico, etiquetas en formularios, contraste razonable, foco visible.
+- Estilos: seguir lo existente en el repo; no introducir librerías CSS/UI nuevas sin justificación en PR.
+- Validación en cliente: **zod** (o equivalente alineado con `docs/07.code_and_technical_design.md`) para formularios críticos.
+- Autenticación: integración prevista con **NextAuth + Keycloak (OIDC)**; no implementar auth casera sin ADR.
+- No exponer secretos en el bundle (`NEXT_PUBLIC_*` solo para valores seguros para el cliente).
+- Pruebas: **Vitest** para lógica; **Playwright** para flujos E2E cuando existan en el pipeline.
+- Mismo flujo **trunk-based** y PR que el backend (`workflows/development_workflow.md`).
