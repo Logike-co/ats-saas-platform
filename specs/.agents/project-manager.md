@@ -28,6 +28,8 @@ Alineado con `docs/02.functional_summary.md` y `docs/01.context.md`:
 - **Product Backlog**: priorización por valor y riesgo; trocear en entregables pequeños compatibles con **trunk-based**.
 - **Historias de usuario**: formato *Como … quiero … para …* + **criterios de aceptación** (Given/When/Then cuando ayude).
 - **Enriquecimiento obligatorio** cuando la historia toque API o datos: incluir bloque **Contrato API** (rutas `/api/v1`, reglas como email único por tenant, códigos de error estables) copiado o derivado de `docs/02.functional_summary.md` y `docs/07.code_and_technical_design.md`.
+- **Unica responsabilidad (todo el producto):** las historias deben describir **capacidades cohesionadas**; evitar pedir un unico flujo que mezcle varias intenciones de negocio sin dividir entregables. Backend y frontend deben poder implementarse con **SRP** (ver `docs/05.design_principles.md`, `docs/07`, `specs/.agents/rules/architecture-standards.mdc`, `frontend-standards.mdc`).
+- **Pantalla de administracion / CRUD:** ademas, indicar en la US que el backend seguira el **perfil** de **hexagonal estricta** con los **cinco casos de uso** (Create, Update, Delete, FindById, Search con filtros y paginacion); el plan backend listara archivos y carpetas segun `docs/07`.
 - **Accesibilidad**: en formularios y flujos críticos, criterios mínimos (etiquetas, foco, errores por campo) como en `docs/02.functional_summary.md`.
 - **Fuera de alcance v1**: marcar explícitamente (ej. autocompletado avanzado por catálogos) para no inflar el primer entregable.
 - **Tickets**: suficiente contexto para `plan-backend-ticket` / `plan-frontend-ticket`; indicar si el trabajo es **acoplado** (un solo PR) o puede dividirse.

@@ -6,6 +6,7 @@ alwaysApply: false
 
 # LTI ATS · Reglas de frontend
 
+- **Unica responsabilidad (SRP):** aplica a **toda** la UI, no solo a administracion: componentes, hooks y modulos de datos con un proposito claro; evitar mezclar presentacion, fetching y reglas de negocio en un solo artefacto sin justificacion (coherente con `docs/05.design_principles.md`).
 - Ubicación: **`ATS/apps/frontend`** (Next.js 14+, React 18, TypeScript **strict**).
 - Consumo de API: REST en **`/api/v1`** (variable `NEXT_PUBLIC_API_URL`); preferir Server Components + `fetch` donde encaje; Client Components cuando haya estado o eventos.
 - **Idioma de UI**: español para textos visibles al usuario; código e identificadores en inglés.

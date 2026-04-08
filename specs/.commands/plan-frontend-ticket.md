@@ -41,6 +41,7 @@ Write a Markdown file:
 - **Server vs Client Components** choice
 - Data fetching (`fetch` to `NEXT_PUBLIC_API_URL`, caching, revalidation)
 - Shared types: `ATS/packages/shared` if applicable
+- **SRP:** name the components/hooks/modules involved and how responsibilities are split (presentation vs data vs validation); avoid a single oversized module unless justified — see `docs/05.design_principles.md` and `specs/.agents/rules/frontend-standards.mdc`
 
 ### 4. Implementation steps
 

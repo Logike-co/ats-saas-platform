@@ -31,10 +31,12 @@ Entregar cambios **listos para PR** hacia **`main`**, con tests y calidad alinea
 ## Método
 
 1. Identificar el **módulo/feature** correcto; evitar acoplamiento con otros dominios.
-2. **TDD** en lógica de negocio y casos de uso cuando sea viable.
-3. DTOs + validación en el borde; servicios con responsabilidad clara.
-4. Cualquier cambio de contrato API: coordinar con frontend / `packages/shared` y documentar si afecta a integradores.
-5. Antes de PR: `pnpm lint`, `pnpm test`, `pnpm build` en el workspace afectado.
+2. **Siempre** aplicar **unica responsabilidad (SRP)** e **ISP** en puertos de salida segun **`docs/07.code_and_technical_design.md`** (seccion transversal) y **`specs/.agents/rules/architecture-standards.mdc`**: casos de uso acotados, **un service por use case**, controllers sin Prisma ni logica de dominio pesada.
+3. Si la tarea es ademas **administracion / CRUD** de una entidad: seguir el **perfil** completo en `docs/07` (cinco use cases, estructura de carpetas, lista de archivos en `specs/changes/*_backend.md`).
+4. **TDD** en lógica de negocio y casos de uso cuando sea viable.
+5. DTOs + validación en el borde; **controllers** solo invocan **use cases** (puertos de entrada), no repositorios.
+6. Cualquier cambio de contrato API: coordinar con frontend / `packages/shared` y documentar si afecta a integradores.
+7. Antes de PR: `pnpm lint`, `pnpm test`, `pnpm build` en el workspace afectado.
 
 ## Feature acoplado backend + frontend
 

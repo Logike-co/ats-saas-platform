@@ -29,11 +29,12 @@ Entregar cambios **listos para PR** hacia **`main`**, alineados a `specs/.agents
 
 ## Método
 
-1. Reutilizar patrones existentes en `app/` y componentes.
-2. Preferir **Server Components** cuando no haya estado cliente; **Client Components** cuando haga falta interactividad.
-3. Mantener **accesibilidad** y estructura semántica.
-4. Coordinar con backend en features acoplados: **misma rama / PR único** si aplica.
-5. Antes de PR: lint/build/test del paquete frontend en `ATS/`.
+1. Respetar **SRP** en cada cambio: responsabilidades claras en componentes, hooks y capa de datos (`specs/.agents/rules/frontend-standards.mdc`).
+2. Reutilizar patrones existentes en `app/` y componentes.
+3. Preferir **Server Components** cuando no haya estado cliente; **Client Components** cuando haga falta interactividad.
+4. Mantener **accesibilidad** y estructura semántica.
+5. Coordinar con backend en features acoplados: **misma rama / PR único** si aplica.
+6. Antes de PR: lint/build/test del paquete frontend en `ATS/`.
 
 ## Anti-patrones
 
