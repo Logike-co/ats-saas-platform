@@ -1,0 +1,68 @@
+# Estándares Recomendados para Mensajes de Commit
+
+Para los mensajes de commit, se recomienda seguir estándares que mejoren la legibilidad, la trazabilidad y la
+comprensión del historial del proyecto **IT2Pay**.
+
+## Principios Generales
+
+1. **Claridad y Concisión**: El mensaje debe ser fácil de entender y directo al grano.
+2. **Atomicidad**: Cada commit debe representar un cambio lógico y completo. No mezcles múltiples cambios no
+   relacionados en un solo commit.
+3. **Utilidad**: El historial de commits debe ser útil para entender *por qué* se hizo un cambio, no solo *qué* se
+   cambió.
+
+## Estándares Comunes
+
+El estándar recomendado es **Conventional Commits**.
+
+```markdown
+<tipo>(<ámbito>): <descripción_corta>
+
+[cuerpo_del_mensaje_más_detallado]
+
+[pie_de_página_con_referencias_a_issues]
+```
+
+### 1. Tipo (`<tipo>`)
+
+Obligatorio. Describe la naturaleza del cambio.
+
+* **`feat`**: Una nueva característica o flujo de recaudo.
+* **`fix`**: Una corrección de un error (bug fix) en conciliación o integraciones.
+* **`docs`**: Cambios solo en la documentación.
+* **`style`**: Cambios que no afectan el significado del código (formato, linting).
+* **`refactor`**: Un cambio de código que no corrige un error ni añade una característica.
+* **`perf`**: Un cambio de código que mejora el rendimiento de transacciones o cifrado.
+* **`test`**: Añadir pruebas faltantes o corregir pruebas existentes (TDD).
+* **`chore`**: Tareas de configuración o ajustes de dependencias.
+
+### 2. Ámbito (`(<ámbito>)`) - Opcional
+
+Contexto adicional. Ejemplos en IT2Pay: `feat(recaudo):`, `fix(reval-soap):`, `docs(arquitectura):`, `perf(cifrado):`.
+
+### 3. Descripción Corta (`<descripción_corta>`)
+
+Obligatoria. Asunto del commit. Escrito en modo imperativo (ej: "añadir soporte SOAP", no "añadido soporte").
+
+### 4. Cuerpo del Mensaje (`[cuerpo_del_mensaje_más_detallado]`) - Opcional
+
+Proporciona detalles adicionales sobre el cambio y su justificación técnica o de negocio.
+
+### 5. Pie de Página (`[pie_de_página]`) - Opcional
+
+* **Referencias a Tickets**: Enlaza a issues en sistemas de seguimiento (ej. `Fixes IT2PAY-015`, `Closes REVAL-04`).
+
+### Ejemplo Completo
+
+```markdown
+feat(recaudo): implementar cliente SOAP cifrado para validación de facturas
+
+Implementa la funcionalidad de ValidateTransaction integrando el WebServiceTemplate
+hacia Reval. Incluye cifrado inicial de payload en AES/CBC de acuerdo al
+estándar RRT y adición de cabeceras WS-Security para autenticación.
+
+La respuesta XML se traduce limpiamente al TransactionResponse record del Dominio,
+evitando fugas lógicas.
+
+Closes IT2PAY-042
+```
