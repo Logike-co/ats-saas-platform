@@ -1,16 +1,16 @@
 ---
-description: "Auto-aprendizaje de patrones del proyecto"
+description: "Auto-aprendizaje de patrones del proyecto LTI ATS"
 alwaysApply: true
 ---
 
-# Auto-aprendizaje de Patrones
+# Auto-aprendizaje de patrones (LTI ATS)
 
-Analiza el proyecto actual, identifica los siguientes patrones y aplícalos consistentemente:
+Antes de proponer cambios, revisa el monorepo y aplica consistencia:
 
-1. **Estructura de archivos**: Cómo están organizados los componentes, servicios, utils
-2. **Convenciones de nombres**: Para archivos, funciones, variables, tipos
-3. **Patrones de imports**: Paths absolutos vs relativos, orden de imports
-4. **Gestión de errores**: Estructura try/catch, logging, tipos de error
-5. **Estilo de código**: Uso de TypeScript strict, preferencias de sintaxis
+1. **Estructura**: `ATS/apps/backend` (NestJS), `ATS/apps/frontend` (Next.js App Router), `ATS/packages/shared`, `docs/`, `guides/`, `workflows/`, `specs/`.
+2. **Convenciones**: TypeScript estricto; código en inglés; textos de UI en español cuando aplique.
+3. **Imports y módulos**: respetar módulos por feature en NestJS; no acoplar persistencia entre dominios.
+4. **Errores y API**: validación en frontera; respuestas coherentes (`docs/07`); `tenant_id` en datos multi-tenant.
+5. **Git**: trunk-based, PR a `main` (`workflows/development_workflow.md`).
 
-Antes de sugerir código, revisa ejemplos existentes en el proyecto y mantén consistencia.
+Reglas detalladas: `specs/.agents/rules/architecture-standards.mdc`, `frontend-standards.mdc`, `documentation-standards.mdc`.

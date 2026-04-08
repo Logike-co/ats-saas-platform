@@ -32,7 +32,7 @@ If the user **explicitly** requested no git operations (e.g. "no PR", "only comm
 ## 1. Inspect current state
 
 - Run `git status` and `git diff` (and `git diff --staged` if needed) to list all modified, added, and deleted files.
-- Identify the current branch. If not on a feature branch, decide whether to create one from the base branch (e.g. `main` or `develop`) before committing.
+- Identify the current branch. If not on a feature branch, create one from **`main`** (trunk-based; see `workflows/development_workflow.md`) before committing.
 
 ## 2. Resolve scope: full commit vs feature-scoped commit
 
@@ -49,10 +49,10 @@ If the user **explicitly** requested no git operations (e.g. "no PR", "only comm
 
 ## 3. Commit message
 
-- Write the commit message **in English** (per `ai-specs/specs/base-standards.mdc`).
-- Make it **descriptive** (per Git Workflow in `backend-standards.mdc` and `frontend-standards.mdc`).
+- Write the commit message **in English** (see `specs/.agents/rules/commit-message-standards.mdc`).
+- Use **Conventional Commits**; be descriptive (aligned with trunk-based, small PRs in `workflows/development_workflow.md`).
 - Structure it so that:
-  - **Subject line**: Short, imperative summary (e.g. "Add candidate filters to position list", "Fix validation for application deadline"). Optionally prefix with a scope or ticket id (e.g. `SCRUM-123: Add candidate filters`).
+  - **Subject line**: Short, imperative summary (e.g. "Add job listing API", "Fix tenant filter on applications query"). Optionally prefix with a scope or ticket id (e.g. `SCRUM-123: Add job listing API`).
   - **Body** (if needed): Bullet points or short paragraphs describing what changed and why (areas touched, new behavior, fixes). Reference ticket IDs here if they apply.
 - Do not commit secrets, `.env`, or other sensitive or generated artifacts.
 
@@ -63,11 +63,11 @@ If the user **explicitly** requested no git operations (e.g. "no PR", "only comm
 
 ## 5. Pull Request
 
-- Use the **GitHub CLI (`gh`)** for all GitHub operations (per `develop-backend.md`).
-- Create or update the PR for the current branch:
-  - **Title**: Clear, aligned with the commit (e.g. include ticket ID if applicable: `[SCRUM-123] Add candidate filters to position list`).
-  - **Description**: Summarize the change set, link to the ticket if relevant, and note any testing or follow-ups.
-- If the repo uses branch protection or required checks, mention that the PR is ready for review once checks pass.
+- Use the **GitHub CLI (`gh`)** for GitHub operations.
+- Open the PR **into `main`** (trunk-based).
+- **Title**: Clear, aligned with the commit (e.g. include ticket ID if applicable: `[SCRUM-123] Add job listing API`).
+- **Description**: Summarize the change set, link to the ticket if relevant, note testing and follow-ups.
+- Mention that **CI must pass** before merge (`ATS/.github/workflows/ci.yml`).
 
 ## 6. Summary for the user
 
@@ -77,9 +77,9 @@ If the user **explicitly** requested no git operations (e.g. "no PR", "only comm
 
 # References
 
-- `ai-specs/specs/base-standards.mdc`: English-only for commit messages and technical artifacts.
-- `ai-specs/specs/backend-standards.mdc` and `ai-specs/specs/frontend-standards.mdc`: Git Workflow (feature branches, descriptive commits, small focused branches).
-- `ai-specs/.commands/develop-backend.md`: Use `gh` for GitHub and PR creation; optional ticket-based branch and PR linking.
+- `specs/.agents/rules/commit-message-standards.mdc`: English Conventional Commits.
+- `workflows/development_workflow.md`: trunk-based, coupled vs decoupled PRs, CI gate.
+- `specs/.commands/develop-backend-ticket.md` / `develop-frontend-ticket.md`: implementation flow before commit.
 
 # Notes
 

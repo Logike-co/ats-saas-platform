@@ -1,0 +1,42 @@
+# Estándares de mensajes de commit (LTI ATS)
+
+Los mensajes de commit deben ser **en inglés**, descriptivos y alineados con **Conventional Commits**, tal como indica `specs/.commands/commit.md` y el flujo en `workflows/development_workflow.md`.
+
+## Formato
+
+```text
+<type>(<optional-scope>): <short imperative description>
+
+[optional body with bullets or paragraphs]
+
+[optional footer: Fixes #123]
+```
+
+## Tipos habituales
+
+| Tipo | Uso |
+| :--- | :--- |
+| `feat` | Nueva funcionalidad |
+| `fix` | Corrección de bug |
+| `docs` | Solo documentación (`docs/`, `guides/`, `workflows/`, README) |
+| `refactor` | Cambio interno sin cambiar comportamiento observable |
+| `test` | Solo tests |
+| `chore` | Herramientas, CI, dependencias menores |
+| `perf` | Mejora de rendimiento |
+
+## Ámbitos sugeridos (scope)
+
+Ejemplos: `ats-api`, `ats-web`, `shared`, `ci`, `architecture`, `specs`.
+
+```text
+feat(ats-api): add health check module
+fix(ats-web): correct API base URL in server fetch
+docs(architecture): align branch model with trunk-based workflow
+chore(ci): run workflow only on main branch
+```
+
+## Buenas prácticas
+
+- **Imperativo** en la línea de asunto (*Add*, *Fix*, *Update*, no *Added* / *Fixed*).
+- Un commit = un **cambio lógico** coherente (especialmente en PR único por feature acoplado).
+- No incluir secretos, `.env`, ni artefactos generados.

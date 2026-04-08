@@ -1,0 +1,72 @@
+---
+description: "Arquitectura y estándares del monorepo LTI ATS (NestJS backend modular, REST, multi-tenant)"
+globs: "ATS/apps/backend/**/*.ts,ATS/packages/shared/**/*.ts"
+alwaysApply: false
+---
+
+# LTI ATS · Reglas de arquitectura (backend)
+
+Contexto del producto: **Applicant Tracking System** SaaS multi-tenant para PYMEs. Código aplicación en `ATS/` (monorepo `pnpm`).
+
+## Ubicación y forma del backend
+
+- Backend: **`ATS/apps/backend`** (NestJS, TypeScript).
+- Contratos compartidos / tipos: **`ATS/packages/shared`** cuando aplique.
+- API REST versionada: prefijo **`/api/v1`**.
+- Documentación de arquitectura del producto: raíz del repo **`docs/`**, **`guides/`**, flujo **`workflows/development_workflow.md`**.
+
+## Monolito modular (por feature)
+
+- Organizar por **módulos de dominio** (ej. `jobs`, `applications`, `tenancy`, `notifications`), no por capa técnica plana.
+- Dentro de un módulo NestJS típico: `*.module.ts`, `*.controller.ts`, servicios de aplicación, DTOs, y acceso a datos (repositorios / Prisma cuando exista).
+- **Prohibido** acoplar módulos mediante imports circulares o acceso a persistencia de otro módulo sin contrato explícito.
+- **Multi-tenant:** toda lectura/escritura de datos de negocio debe filtrarse por **`tenant_id`** (ver `docs/08.data.md`).
+
+## Dependencias (hacia adentro)
+
+- **Controllers**: validación de entrada (DTO + `class-validator`), orquestación mínima, llamada a servicios.
+- **Servicios / casos de uso**: reglas y orquestación; sin detalles de HTTP.
+- **Dominio**: entidades y reglas críticas preferiblemente testeables sin Nest ni DB.
+- **Infraestructura**: Prisma/DB, clientes HTTP, colas (BullMQ), fuera del núcleo de reglas cuando sea posible.
+
+## Convenciones de naming
+
+- Código en **inglés** (identificadores, archivos, símbolos).
+- DTOs con sufijo claro (`CreateJobDto`, `JobResponseDto`).
+- Servicios con responsabilidad única; evitar `UtilService` genéricos.
+
+## Errores y API
+
+- Respuestas de error coherentes: código de negocio, mensaje controlado, **`traceId`** cuando exista correlación (ver `docs/07.code_and_technical_design.md`).
+- **Fail-fast** en validación de entrada; no filtrar datos sensibles en mensajes al cliente.
+- Códigos HTTP semánticos (4xx validación/autorización, 5xx solo fallos inesperados).
+
+## Seguridad
+
+- Autenticación/autorización vía **Keycloak (OIDC)**; el backend valida JWT (issuer, audience, exp).
+- No loguear secretos ni tokens completos.
+- MFA obligatorio para administradores (requisito de producto; ver `docs/`).
+
+## TDD y pruebas
+
+- **TDD obligatorio** para lógica nueva (proyecto); prioridad en reglas de negocio y casos de uso.
+- Objetivo: **~90% cobertura en lógica crítica** (según `docs/03.quality_attributes.md`).
+- Backend: **Jest**; ejecutar desde `ATS/` con `pnpm --filter @lti-ats/backend test` (o equivalente del workspace).
+- Tests de integración con DB cuando el comportamiento dependa de SQL/constraints (estrategia a definir con Prisma/Testcontainers según evolución del repo).
+
+## Herramientas
+
+- Build / run: **`pnpm`** workspaces desde `ATS/`.
+- Lint: ESLint en backend; no desactivar reglas salvo justificación en PR.
+
+## Git y entrega
+
+- **Trunk-based**: ramas `feature/*` desde **`main`**; PR a **`main`** (ver `workflows/development_workflow.md` y `specs/.commands/commit.md`).
+- Features **acoplados** backend+frontend: **un solo PR** con alcance unificado cuando proceda.
+
+## Anti-patrones
+
+- Lógica de negocio pesada en controllers.
+- Consultas sin `tenant_id` en entidades multi-tenant.
+- Microservicios o colas complejas sin necesidad documentada (ADR).
+- Dependencias nuevas sin justificar en el PR.

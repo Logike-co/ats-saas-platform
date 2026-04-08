@@ -1,0 +1,33 @@
+---
+description: "Dónde y cómo mantener documentación en el repo LTI ATS"
+globs: "docs/**/*.md,guides/**/*.md,workflows/**/*.md"
+alwaysApply: false
+---
+
+# LTI ATS · Estándares de documentación
+
+## Ubicaciones
+
+| Contenido | Ruta |
+| :--- | :--- |
+| Arquitectura (13 puntos Simon Brown) | `docs/01.context.md` … `docs/13.architecture_decision_records.md` |
+| Índice | `docs/00.index.md` |
+| Guía y plantilla reutilizable | `guides/guia_simon_brown.md`, `guides/template_architecture_documentation_simon_brown.md` |
+| Flujo de desarrollo | `workflows/development_workflow.md` |
+| README de producto / monorepo | `README.md`, `ATS/README.md` |
+
+## Idioma
+
+- Documentación **funcional** y operativa orientada al equipo: **español** (como el resto de `docs/` actual).
+- **Commits**, nombres de ramas técnicas y mensajes de PR hacia mantenedores externos: **inglés** (Conventional Commits).
+- ADRs y diagramas: español o inglés, pero **consistente** dentro de cada archivo.
+
+## Cuándo actualizar
+
+- Cualquier cambio que altere contratos públicos, datos, despliegue, seguridad o flujo operativo debe reflejarse en el **doc correspondiente** en la misma entrega.
+- Decisiones arquitectónicas relevantes → **ADR** en `docs/13.architecture_decision_records.md` o ficheros `docs/adr/` si se crean más adelante.
+
+## Formato
+
+- Markdown claro: encabezados, listas, tablas; diagramas **Mermaid** válidos.
+- Enlaces relativos entre archivos del repo cuando sea posible.

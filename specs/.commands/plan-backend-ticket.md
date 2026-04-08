@@ -1,127 +1,87 @@
 # Role
 
-You are an expert software architect with extensive experience in Node/Express projects applying Domain-Driven Design (DDD).
+You are a senior backend architect for **LTI ATS**: **NestJS**, **TypeScript**, REST **`/api/v1`**, **PostgreSQL**, **multi-tenant** (`tenant_id`), aligned with `specs/.agents/backend-developer.md` and `specs/.agents/rules/architecture-standards.mdc`.
 
-# Ticket ID
+# Ticket / input
 
-$ARGUMENTS
+`$ARGUMENTS` — Jira key, GitHub issue, path to a markdown spec, or pasted user story.
 
 # Goal
 
-Obtain a step-by-step plan for a Jira ticket that is ready to start implementing.
+Produce a **step-by-step implementation plan** (no code) so a developer can execute the ticket end-to-end using only this document.
 
-# Process and rules
+# Process
 
-1. Adopt the role of `.claude/agents/backend-developer.md`
-1. Analyze the Jira ticket mentioned in #ticket using the MCP. If the mention is a local file, then avoid using MCP
-2. Propose a step-by-step plan for the backend part, taking into account everything mentioned in the ticket and applying the project’s best practices and rules you can find in  `/ai-specs/specs`. 
-3. Apply the best practices of your role to ensure the developer can be fully autonomous and implement the ticket end-to-end using only your plan. 
-4. Do not write code yet; provide only the plan in the output format defined below.
-5. If you are asked to start implementing at some point, make sure the first thing you do is to move to a branch named after the ticket id (if you are not yet there) and follow the process described in the command /develop-us.md
+1. Adopt the mindset of `specs/.agents/backend-developer.md`.
+2. **Source of truth**: read the ticket/issue/spec from MCP (Jira) **or** from a **local file** if the user provided a path — skip MCP if not available.
+3. Cross-check with **`docs/`** (`02.functional_summary`, `08.data`, `06.software_architecture`, `07.code_and_technical_design`) when the change touches domain, data, or API.
+4. Apply **trunk-based** rules from `workflows/development_workflow.md` (branch from `main`, PR to `main`). If the same feature is **coupled** with frontend, state that the branch/PR must be **shared** with frontend work.
+5. Do **not** write implementation code in this command; output is the plan only.
+6. If the user later asks to implement, follow `specs/.commands/develop-backend-ticket.md` from **Step 0** (branch) onward.
 
-# Output format
+# Output
 
-Markdown document at the path `ai-specs/changes/[jira_id]_backend.md` containing the complete implementation details.
-Follow this template:
+Write a Markdown file:
 
-## Backend Implementation Plan Ticket Template Structure
+`specs/changes/[TICKET-ID]_backend.md`
 
-### 1. **Header**
-- Title: `# Backend Implementation Plan: [TICKET-ID] [Feature Name]`
+Use `[TICKET-ID]` from the ticket or a short slug if there is no id (e.g. `SPEC-local-auth`).
 
-### 2. **Overview**
-- Brief description of the feature and architecture principles (DDD, clean architecture)
+## Template: Backend Implementation Plan
 
-### 3. **Architecture Context**
-- Layers involved (Domain, Application, Presentation)
-- Components/files referenced
+### 1. Header
 
-### 4. **Implementation Steps**
-Detailed steps, typically:
+- Title: `# Backend Implementation Plan: [TICKET-ID] [Feature name]`
 
-#### **Step 0: Create Feature Branch**
-- **Action**: Create and switch to a new feature branch following the development workflow. Check if it exists and if not, create it
-- **Branch Naming**: Follow the project's branch naming convention (`feature/[ticket-id]-backend`, make it required to use this naming, don't allow to keep on the general task [ticket-id] if it exists to separate concerns)
-- **Implementation Steps**:
-  1. Ensure you're on the latest `main` or `develop` branch (or appropriate base branch)
-  2. Pull latest changes: `git pull origin [base-branch]`
-  3. Create new branch: `git checkout -b [branch-name]`
-  4. Verify branch creation: `git branch`
-- **Notes**: This must be the FIRST step before any code changes. Refer to `ai-specs/specs/backend-standards.mdc` section "Development Workflow" for specific branch naming conventions and workflow rules.
+### 2. Overview
 
-#### **Step N: [Action Name]**
-- **File**: Target file path
-- **Action**: What to implement
-- **Function Signature**: Code signature
-- **Implementation Steps**: Numbered list
-- **Dependencies**: Required imports
-- **Implementation Notes**: Technical details
+- Scope, out-of-scope, relation to ATS domain (vacancies, applications, etc.).
 
-Common steps:
-- **Step 1**: Create Validation Function
-- **Step 2**: Create Service Method
-- **Step 3**: Create Controller Method
-- **Step 4**: Add Route
-- **Step 5**: Write Unit Tests (with subcategories: Successful Cases, Validation Errors, Not Found, Reference Validation, Server Errors, Edge Cases)
+### 3. Architecture context
 
-Example of a good structure:
-**Implementation Steps**:
+- NestJS **module(s)** affected under `ATS/apps/backend` (e.g. `jobs`, `applications`).
+- New/changed **controllers**, **services**, **DTOs**, **guards**, **Prisma/schema** (if applicable).
+- Multi-tenant: how `tenant_id` is enforced on every read/write.
 
-1. **Validate Position Exists**:
-   - Use `Position.findOne(positionId)` to retrieve existing position
-   - If position not found, throw `new Error('Position not found')`
-   - Store the existing position for merging
+### 4. API contract
 
-#### **Step N+1: Update Technical Documentation**
-- **Action**: Review and update technical documentation according to changes made
-- **Implementation Steps**:
-  1. **Review Changes**: Analyze all code changes made during implementation
-  2. **Identify Documentation Files**: Determine which documentation files need updates based on:
-     - Data model changes → Update `ai-specs/specs/data-model.md`
-     - API endpoint changes → Update `ai-specs/specs/api-spec.yml`
-     - Standards/libraries/config changes → Update relevant `*-standards.mdc` files
-     - Architecture changes → Update relevant architecture documentation
-  3. **Update Documentation**: For each affected file:
-     - Update content in English (as per `documentation-standards.mdc`)
-     - Maintain consistency with existing documentation structure
-     - Ensure proper formatting
-  4. **Verify Documentation**: 
-     - Confirm all changes are accurately reflected
-     - Check that documentation follows established structure
-  5. **Report Updates**: Document which files were updated and what changes were made
-- **References**: 
-  - Follow process described in `ai-specs/specs/documentation-standards.mdc`
-  - All documentation must be written in English
-- **Notes**: This step is MANDATORY before considering the implementation complete. Do not skip documentation updates.
+- Method, path under `/api/v1/...`, request/response shapes, status codes, error shape (reference `docs/07`).
 
-### 5. **Implementation Order**
-- Numbered list of steps in sequence (must start with Step 0: Create Feature Branch and end with documentation update step)
+### 5. Implementation steps
 
-### 6. **Testing Checklist**
-- Post-implementation verification checklist
+#### Step 0: Branch (mandatory)
 
-### 7. **Error Response Format**
-- JSON structure
-- HTTP status code mapping
+- From latest `main`: `git pull origin main` → `git checkout -b feature/[TICKET-ID]-short-slug`
+- If **coupled feature**: use **one shared branch** name agreed with frontend (see workflow).
 
-### 8. **Partial Update Support** (if applicable)
-- Behavior for partial updates
+#### Steps 1…N
 
-### 9. **Dependencies**
-- External libraries and tools required
+For each step:
 
-### 10. **Notes**
-- Important reminders and constraints
-- Business rules
-- Language requirements
+- **Files** under `ATS/apps/backend/...` (and `ATS/packages/shared` if types are shared).
+- **Action** (what to implement).
+- **Tests** (Jest): cases to cover (happy path, validation, auth/tenant isolation, errors).
 
-### 11. **Next Steps After Implementation**
-- Post-implementation tasks (documentation is already covered in Step N+1, but may include integration, deployment, etc.)
+#### Step N+1: Documentation (mandatory)
 
-### 12. **Implementation Verification**
-- Final verification checklist:
-  - Code Quality
-  - Functionality
-  - Testing
-  - Integration
-  - Documentation updates completed
+- Update **`docs/08.data.md`** if the schema changes.
+- Update **`docs/06` / `docs/07`** if architecture or API contract changes.
+- Add **ADR** snippet or update **`docs/13.architecture_decision_records.md`** if the decision is structural.
+- Follow `specs/.agents/rules/documentation-standards.mdc` (Spanish for product docs is OK).
+
+### 6. Testing checklist
+
+- `pnpm` commands from `ATS/` (lint, test, build for affected packages).
+- Manual checks if any (e.g. Keycloak role).
+
+### 7. Security and compliance
+
+- AuthZ, tenant isolation, PII/logging.
+
+### 8. Dependencies / migrations
+
+- New npm packages (justify); Prisma migrations order if used.
+
+### 9. Verification
+
+- CI must pass; no secrets committed; PR targets **`main`**.
