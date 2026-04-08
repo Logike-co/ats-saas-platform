@@ -1,0 +1,38 @@
+services:
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: ats-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./infra/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - frontend
+      - backend
+
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile
+    container_name: ats-frontend
+    environment:
+      NEXT_PUBLIC_API_URL: http://api.localhost/api/v1
+    expose:
+      - "3000"
+
+  backend:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+    container_name: ats-backend
+    environment:
+      BACKEND_PORT: 3001
+      DATABASE_URL: postgresql://ats:ats@postgres:5432/ats
+      REDIS_URL: redis://redis:6379
+    expose:
+      - "3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started

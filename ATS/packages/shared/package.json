@@ -1,0 +1,17 @@
+{
+  "name": "@lti-ats/shared",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "echo \"No lint configured for shared\"",
+    "test": "echo \"No tests yet\"",
+    "format": "echo \"No format step for shared\""
+  },
+  "devDependencies": {
+    "typescript": "^5.6.2"
+  }
+}

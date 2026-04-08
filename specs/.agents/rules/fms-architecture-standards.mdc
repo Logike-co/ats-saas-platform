@@ -1,0 +1,125 @@
+---
+description: "Arquitectura y estándares del monolito modular (Hexagonal + DDD) para FMS SaaS"
+globs: "{src/main/java,src/test/java}/**/*.java"
+alwaysApply: false
+---
+
+# FMS SaaS · Reglas de arquitectura (Monolito Modular)
+
+## Estructura de carpetas (shape esperado por módulo)
+
+- Cada bounded context debe mantener el mismo “shape”:
+
+```text
+src/main/java/co/logike/fms/<module>/
+├── application/
+│   ├── ports/
+│   │   ├── in/                 # UseCases (interfaces)
+│   │   └── out/                # Ports (interfaces)
+│   └── service/                # Implementaciones de UseCase / orquestación
+├── domain/
+│   └── model/                  # Dominio puro (sin deps externas)
+└── infrastructure/
+    └── adapters/
+        ├── in/
+        │   ├── web/            # REST/HTTP (si aplica)
+        │   └── ui/             # Vaadin SSR
+        └── out/
+            └── persistence/    # JPA/SQL, mappers, repositorios
+```
+
+- Las piezas “cross-cutting” van en `co/logike/fms/common/**` (no duplicarlas en cada módulo).
+
+## Monolito modular (Package-by-Feature / Bounded Contexts)
+
+- Cada módulo (bounded context) vive en su paquete (`company`, `fleet`, `personnel`, `accounting`, etc.).
+- **Prohibido** acceder directo a lógica profunda o persistencia de otro módulo.
+- La comunicación entre módulos debe ocurrir **solo** por interfaces públicas (puertos/casos de uso), y los límites se
+  deben poder reforzar con **ArchUnit**.
+
+## Hexagonal / Clean Architecture (dependencias hacia adentro)
+
+- **`domain`**: lógica pura, sin dependencias externas.
+- **`application`**: orquesta casos de uso; define puertos `ports.in` y `ports.out`.
+- **`infrastructure`**: detalles técnicos (web/ui, persistencia, integraciones).
+- UI / controllers **no** hablan con repositorios JPA ni entidades JPA: dependen de **puertos de entrada**.
+
+## Convenciones de nombres (estrictas)
+
+- **Inbound ports**: sufijo `UseCase` (ej. `CreateCompanyUseCase`)
+  - **Obligatorios para entidades**: `Create`, `Update`, `Delete`, `Search`, `FindById`.
+    - `execute(...)` para comandos (mutación)
+    - `query(...)` para consultas (solo lectura)
+- **Outbound ports**: sufijo `Port` y ser específicos por ISP (ej. `FindCompanyByIdPort`)
+    - `execute(...)` escritura, `query(...)` lectura
+- **Application services**: sufijo `Service` (orquestan; la lógica pesada vive en dominio)
+- **Adapters**: sufijo `Adapter` (ej. `CompanyRepositoryJpaAdapter`)
+
+## Principios de diseño (como reglas de implementación)
+
+- Preferir soluciones simples y operables por equipo pequeño (**KISS**, **YAGNI**).
+- Evitar duplicación (**DRY**) y mantener responsabilidades únicas (**SOLID**).
+- La lógica de negocio “pesada” debe vivir en **`domain`** (entidades/VO), no en controllers ni en infraestructura.
+
+## Excepciones y errores HTTP
+
+- Usar excepciones **Runtime** (no verificadas).
+- **No leakage**: nunca propagar excepciones técnicas crudas (p.ej. `SQLException`) hacia arriba; envolver en
+  excepciones semánticas.
+- Transformar errores HTTP solo en el `GlobalExceptionHandler`, usando **RFC 7807 (ProblemDetail)**.
+
+## Null-safety
+
+- Anotar con **JSpecify** `@NonNull` / `@Nullable`.
+- “Double Defense”: en servicios validar nulos con `Objects.requireNonNull(...)` para fallar rápido.
+- En tests, para pasar nulos intencionales a firmas `@NonNull`, usar `NullSafetyTestUtils.nullOf(Class<T>)`.
+
+## TDD (estricto por capas)
+
+- **Estricto (test-first)** en:
+    - `domain`: invariantes, reglas, Value Objects, validaciones
+    - `application`: casos de uso/orquestación (mocks/dobles para `ports.out`)
+- **Pragmático** en:
+    - UI Vaadin (`infrastructure/adapters/in/ui`): mantenerla delgada; la lógica se cubre en `domain`/`application`
+    - persistencia/integraciones: preferir tests unitarios, y usar **Testcontainers** cuando el comportamiento depende
+      de DB/mapeos/constraints
+- Ciclo base: **Red → Green → Refactor**.
+- Pirámide de pruebas:
+    - **Unitarias**: rápidas, determinísticas, sin I/O (preferidas).
+    - **Integración**: mínimas pero representativas en caminos críticos.
+- Evitar tests frágiles:
+    - sin `sleep`
+    - sin depender de orden de ejecución
+    - asserts pequeños y con intención clara
+
+## Testing (2 suites, por intención)
+
+- **Suite rápida (default)**:
+    - Debe pasar sin Docker.
+    - Ejecuta con `mvn test`.
+    - Enfocada en `domain` y `application` (TDD estricto por capas).
+- **Suite de integración (PostgreSQL real)**:
+  - Ejecuta con `mvn verify -Pit` (activa Failsafe + `vaadin.skip=true`).
+  - Solo entonces corren los tests `*IT.java`; sin `-Pit` no dependes de Docker.
+    - Usa Testcontainers para validar persistencia/constraints/queries/mapeos críticos.
+
+## Stack / defaults del proyecto (útil para decisiones)
+
+- Backend/UI en un solo despliegue JVM (**Spring Boot + Vaadin SSR**).
+- Persistencia relacional (**PostgreSQL**) vía adaptadores de infraestructura.
+- IAM externalizado (**Keycloak OIDC/OAuth2**).
+- Build: **Maven**. Mapeo: **MapStruct**. Documentación API (si se toca REST): **OpenAPI**.
+
+## Flujo de control estándar (no saltarse capas)
+
+- Web/UI adapter recibe input → valida/mappea → invoca **Inbound Port (UseCase)**.
+- Application Service orquesta → carga/persiste vía **Outbound Ports**.
+- Dominio ejecuta reglas → infraestructura materializa detalles (JPA/SQL, integraciones).
+- Respuesta vuelve por el adapter (mapa a DTO/VM). No mezclar DTOs web con dominio.
+
+## Calidad y contribución
+
+- Mantener el proyecto simple: DRY, KISS, YAGNI (evitar sobreingeniería).
+- Antes de push: `mvn test`. Objetivo de cobertura: **> 90%** (JUnit5/Mockito/JaCoCo) y reglas de arquitectura con *
+  *ArchUnit**.
+- Integración a main solo por PR con revisión. Commits con **Conventional Commits** (`feat:`, `fix:`, `chore:`, etc.).

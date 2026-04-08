@@ -1,0 +1,71 @@
+# Dependencias
+node_modules/
+.pnpm-store/
+
+# Variables de entorno y secretos (mantener .env.example versionado)
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+
+# Build y salidas
+dist/
+build/
+out/
+.next/
+.turbo/
+*.tsbuildinfo
+
+# Tests y cobertura
+coverage/
+.nyc_output/
+
+# Logs y temporales
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+tmp/
+temp/
+*.tmp
+*.swp
+*.swo
+*~
+
+# Cachés
+.cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+
+# Sistema operativo
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# IDEs y editores
+.idea/
+*.iml
+.vscode/
+*.sublime-*
+
+# Base de datos local (volúmenes o dumps accidentales)
+*.sqlite
+*.sqlite3
+*.db
+dump.rdb
+
+# Docker (overrides locales con secretos)
+docker-compose.override.yml
+*.override.yml
+
+# Otros
+.vercel
+.netlify
