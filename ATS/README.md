@@ -28,4 +28,4 @@ Base de proyecto para ATS con frontend, backend y base de datos.
    - `pnpm dev`
 
 Frontend: `http://localhost:3000`  
-Backend health: `http://localhost:3001/api/v1/health`
+Backend health (liveness): `http://localhost:<BACKEND_PORT>/api/v1/health` — por defecto `BACKEND_PORT=3001` en el paquete backend; respuesta JSON incluye `apiVersion: "v1"`.
