@@ -7,6 +7,7 @@ export class HealthController {
     return {
       status: "ok",
       service: "backend",
+      apiVersion: "v1",
       timestamp: new Date().toISOString()
     };
   }

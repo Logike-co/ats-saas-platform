@@ -10,7 +10,7 @@ Este proyecto incluye **documentación de arquitectura** (guía Simon Brown), el
 
 | Ruta | Descripción |
 | :--- | :--- |
-| [`docs/`](docs/) | Arquitectura y contexto del producto (13 temas Simon Brown). |
+| [`docs/`](docs/) | Arquitectura, contexto del producto (Simon Brown) y **Product Backlog** (`docs/14.product_backlog.md`). |
 | [`guides/`](guides/) | Guía Simon Brown y plantilla reutilizable de documentación. |
 | [`workflows/`](workflows/) | Flujo de desarrollo (trunk-based, PR, roles, comandos). |
 | [`ATS/`](ATS/) | Monorepo aplicación: frontend (Next.js), backend (NestJS), paquete compartido, Docker y CI. |

@@ -22,12 +22,40 @@ Contexto del producto: **Applicant Tracking System** SaaS multi-tenant para PYME
 - **Prohibido** acoplar módulos mediante imports circulares o acceso a persistencia de otro módulo sin contrato explícito.
 - **Multi-tenant:** toda lectura/escritura de datos de negocio debe filtrarse por **`tenant_id`** (ver `docs/08.data.md`).
 
+## Unica responsabilidad (SRP) e ISP — transversal
+
+- **SRP** aplica a **toda** funcionalidad del backend, no solo a administracion: cada caso de uso y su servicio de aplicacion deben reflejar **una** intencion de negocio clara; prohibido concentrar responsabilidades heterogeneas en un solo “mega servicio” o en el controller.
+- **ISP:** puertos de salida segregados cuando una interfaz acumularia metodos con distintas razones de cambio (ejemplos en `docs/07.code_and_technical_design.md`).
+- La seccion **Dependencias (hacia adentro)** siguiente forma parte de este estandar global.
+
 ## Dependencias (hacia adentro)
 
-- **Controllers**: validación de entrada (DTO + `class-validator`), orquestación mínima, llamada a servicios.
-- **Servicios / casos de uso**: reglas y orquestación; sin detalles de HTTP.
+- **Controllers**: validación de entrada (DTO + `class-validator`), orquestación mínima, llamada **solo a puertos de entrada (use cases)**.
 - **Dominio**: entidades y reglas críticas preferiblemente testeables sin Nest ni DB.
-- **Infraestructura**: Prisma/DB, clientes HTTP, colas (BullMQ), fuera del núcleo de reglas cuando sea posible.
+- **Application**: interfaces **UseCase** (in) y **Port** (out); **una clase Service por caso de uso** que implementa un solo UseCase.
+- **Infraestructura**: adaptadores que implementan **Port**; sin lógica de negocio pesada.
+- **Prohibido**: controller inyectando Prisma, repositorio concreto o queries directas.
+
+## Pantalla de administracion / CRUD de entidad (perfil obligatorio adicional)
+
+Ademas del **SRP transversal**, si la US menciona **administracion**, **ABM**, **CRUD**, **mantenimiento** o **gestion** de una entidad persistida se exige el siguiente paquete:
+
+1. Planificar e implementar **los cinco casos de uso**:
+   - `Create{Entity}UseCase` → `execute`
+   - `Update{Entity}UseCase` → `execute`
+   - `Delete{Entity}UseCase` → `execute`
+   - `Find{Entity}ByIdUseCase` → `query`
+   - `Search{Entities}UseCase` → `query` con **filtros + paginacion** (params documentados).
+
+2. **Puertos de salida (ISP)**: interfaces separadas por responsabilidad, p. ej. `Create{Entity}Port`, `Update{Entity}Port`, `Delete{Entity}Port`, `Find{Entity}ByIdPort`, `Search{Entities}Port`. Evitar un unico mega-repositorio salvo ADR.
+
+3. **Una implementacion Service por UseCase**; dependencias minimas al constructor.
+
+4. **API REST** bajo `/api/v1`: POST, PATCH|PUT, DELETE, GET por id, GET lista con query params de busqueda.
+
+5. **Estructura de carpetas** y nombres de archivo: ver **`docs/07.code_and_technical_design.md`** seccion *Pantallas de administracion*.
+
+6. El comando **`plan-backend-ticket`** debe listar **cada archivo** a crear y su ruta cuando aplique esta regla.
 
 ## Convenciones de naming
 
